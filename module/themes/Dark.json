@@ -1,0 +1,25 @@
+{
+  "meta": {
+    "name": "Dark",
+    "version": "1.0.0"
+  },
+  "colors": {
+    "primary": "#2196F3",
+    "background": "#1E1E1E",
+    "surface": "#1E1E1E",
+    "textPrimary": "#FFFFFF",
+    "textSecondary": "#B0B0B0"
+  },
+  "spacing": {
+    "xs": 4,
+    "s": 8,
+    "m": 16,
+    "l": 24,
+    "xl": 32
+  },
+  "radius": {
+    "s": 4,
+    "m": 8,
+    "l": 12
+  }
+}
