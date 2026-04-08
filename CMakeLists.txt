@@ -10,6 +10,7 @@ find_package(Qt6 REQUIRED COMPONENTS
         Core
         Qml
         Quick
+        Widgets
 )
 
 add_subdirectory(module)

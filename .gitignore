@@ -1,5 +1,9 @@
 build/
 .idea/
+.kateproject.build
+.kdev4/haqml-theme-engine.kdev4
+compile_commands.json
+haqml-theme-engine.kdev4
 *.user
 *.user.*
 CMakeLists.txt.user*

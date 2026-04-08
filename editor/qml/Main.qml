@@ -1,5 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Dialogs
+
 import ThemeEngine 1.0
 
 ApplicationWindow {
@@ -8,6 +10,26 @@ ApplicationWindow {
     visible: true
     title: "Theme Editor - " + (Theme.meta ? Theme.meta["name"] : "Editor")
     color: Theme.color("background")
+
+    Actions { id: actions }
+
+    menuBar: MenuBar {
+        Menu {
+            title: "File"
+            MenuItem { action: actions.newFile }
+            MenuItem { action: actions.openFile }
+            MenuSeparator {  }
+            MenuItem { action: actions.saveFile }
+            MenuSeparator {  }
+            MenuItem { action: actions.quit }
+        }
+        Menu {
+            title: "Edit"
+            MenuItem { text: "Cut" }
+            MenuItem { text: "Copy" }
+            MenuItem { text: "Paste" }
+        }
+    }
 
     Text {
         anchors.fill: parent
