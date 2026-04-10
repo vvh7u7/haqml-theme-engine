@@ -1,97 +1,67 @@
-name: Build HaThemeEngine for all platforms
+name: Build Theme Editor
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+    push:
+        branches: [ "main" ]
+
 
 jobs:
-  build-windows:
-    runs-on: windows-latest
-    steps:
-    - uses: actions/checkout@v4
+    build:
+        name: Theme Editor ${{ matrix.os }}
+        runs-on: ${{ matrix.os }}
+        strategy:
+            matrix:
+                os: [ubuntu-24.04, macos-lastest, windows-latest]
 
-    - name: Install Qt6
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '6.5.0'
-        host: 'windows'
-        target: 'desktop'
-        arch: 'win64_msvc2019_64'
-        modules: 'qt5compat qtcharts qthttpserver'
+        steps:
+            - name: Checkout code
+            uses: actions/checkout@v4
 
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
+            #Linux addiction
+            - name: Install system dependencies (Linux)
+            if: runner.os == 'Linux'
+            run: |
+                sudo apt-get update -qq
+                sudo apt-get install -y ninja-build build-essential libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev libfontconfig1-dev
 
-    - name: Build
-      run: |
-        cd build
-        cmake --build . --config Release
 
-    - name: Upload Windows artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: HaThemeEngine-Windows
-        path: build/Release/HaThemeEditor.exe
+            - name: Install Qt 6.11.0
+            uses: jurplel/install-qt-action@v4
+            with:
+                version: '6.11.0'
+                target: 'desktop'
+                modules: 'qtdeclarative qtsvg'
+                cache: true
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-    - uses: actions/checkout@v4
+            #Configure CMake
+            - name: Configure CMake
+            run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
 
-    - name: Install Qt6
-      uses: jurplel/install-qt-action@v3
-      with:
-        version: '6.5.0'
-        host: 'mac'
-        target: 'desktop'
-        arch: 'clang_64'
-        modules: 'qt5compat qtcharts qthttpserver'
+            - name: Build project
+            run: cmake --build build --config Release --parallel
 
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake .. -DCMAKE_PREFIX_PATH="${{ env.Qt6_DIR }}"
+            #Setup deploy
+            - name: Deploy Windows
+            if: runner.os == 'Windows'
+            shell: pwsh
+            run: |
+                mkdir -p deploy
+                windeployqt.exe --release --no-compiler-runtime --qmldir editor/qml build/editor/ThemeEditor.exe
 
-    - name: Build
-      run: |
-        cd build
-        make
+            - name: Deploy MacOS
+            if: runner.os == 'macOS'
+            run: |
+                mkdir -p deploy
+                macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite cp -R build/editor/*.app deploy/
 
-    - name: Upload macOS artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: HaThemeEngine-macOS
-        path: build/HaThemeEditor.app
+            - name: Prepare Linux artifact
+            if: runner.os == 'Linux'
+            run: |
+                mkdir -p deploy cp build/editor/ThemeEditor deploy/haqml-theme-engine
 
-  build-linux:
-    runs-on: archlinux-latest
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install Qt6 and dependencies
-      run: |
-        pacman -Syu --noconfirm
-        pacman -S --noconfirm base-devel cmake qt6-base qt6-declarative qt6-tools qt6-charts
-
-    - name: Configure CMake
-      run: |
-        mkdir build
-        cd build
-        cmake ..
-
-    - name: Build
-      run: |
-        cd build
-        make
-
-    - name: Upload Linux artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: HaThemeEngine-Linux
-        path: build/editor/HaThemeEditor
+            - name: Upload ready build
+            uses: action/upload-artifact@v4
+            with:
+                name: haqml-theme-engine-${{ matrix.os }}
+                path: deploy/
+                if-no-files-found: error
