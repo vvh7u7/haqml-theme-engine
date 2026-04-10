@@ -19,7 +19,7 @@ jobs:
         host: 'windows'
         target: 'desktop'
         arch: 'win64_msvc2019_64'
-        modules: 'qtqml qtquickcontrols2 qtcharts'
+        modules: 'qt5compat qtcharts qthttpserver'
 
     - name: Configure CMake
       run: |
@@ -50,7 +50,7 @@ jobs:
         host: 'mac'
         target: 'desktop'
         arch: 'clang_64'
-        modules: 'qtqml qtquickcontrols2'
+        modules: 'qt5compat qtcharts qthttpserver'
 
     - name: Configure CMake
       run: |
@@ -70,14 +70,14 @@ jobs:
         path: build/HaThemeEditor.app
 
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: archlinux-latest
     steps:
     - uses: actions/checkout@v4
 
-    - name: Install Qt6
+    - name: Install Qt6 and dependencies
       run: |
-        sudo apt-get update
-        sudo apt-get install -y qt6-base-dev qt6-declarative-dev qt6-tools-dev
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm base-devel cmake qt6-base qt6-declarative qt6-tools qt6-charts
 
     - name: Configure CMake
       run: |
