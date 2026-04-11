@@ -50,7 +50,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          mkdir -p deploy windeployqt --release --no-compiler-runtime --qmldir editor/qml --dir deploy build/editor/ThemeEditor.exe
+          mkdir -p deploy
+          windeployqt --release --no-compiler-runtime --qmldir editor/qml --dir deploy build/editor/ThemeEditor.exe
 
       - name: Deploy macOS
         if: runner.os == 'macOS'
