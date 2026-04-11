@@ -1,66 +1,70 @@
 name: Build Theme Editor
 
 on:
-    push:
-        branches: [ "main" ]
-
+  push:
+    branches: [ "main" ]
 
 jobs:
-    build:
-        name: Theme Editor ${{ matrix.os }}
-        runs-on: ${{ matrix.os }}
-        strategy:
-            matrix:
-                os: [ubuntu-24.04, macos-lastest, windows-latest]
+  build:
+    name: Theme Editor ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-24.04, macos-latest, windows-latest]
 
-        steps:
-            - name: Checkout code
-            uses: actions/checkout@v4
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Install latest CMake
-            uses: lukka/get-cmake@latest
+      - name: Install latest CMake
+        uses: lukka/get-cmake@latest
 
-            - name: Install system dependencies (Linux)
-            if: runner.os == 'Linux'
-            run: |
-                sudo apt-get update -qq
-                sudo apt-get install -y ninja-build build-essential libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev libfontconfig1-dev
+      - name: Install system dependencies (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ninja-build build-essential \
+            libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev \
+            libfontconfig1-dev libdbus-1-dev libxcb-cursor0
 
-            - name: Install Qt
-            uses: jurplel/install-qt-action@v4
-            with:
-                version: '6.10.3'
-                target: 'desktop'
-                modules: 'qtsvg'
-                cache: true
+      - name: Install Qt 6.10.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.10.3'
+          target: desktop
+          modules: 'qtsvg'        # для QML редактора обычно хватает
+          cache: true
 
-            - name: Configure CMake
-            run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
+      - name: Configure CMake
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
 
-            - name: Build project
-            run: cmake --build build --config Release --parallel
+      - name: Build project
+        run: cmake --build build --config Release --parallel
 
-            - name: Deploy Windows
-            if: runner.os == 'Windows'
-            shell: pwsh
-            run: |
-                mkdir -p deploy
-                windeployqt --release --no-compiler-runtime --qmldir editor/qml build/editor/ThemeEditor.exe
+      # ==================== Deploy ====================
+      - name: Deploy Windows
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          mkdir -p deploy
+          windeployqt --release --no-compiler-runtime --qmldir editor/qml --dir deploy build/editor/ThemeEditor.exe
 
-            - name: Deploy MacOS
-            if: runner.os == 'macOS'
-            run: |
-                mkdir -p deploy
-                macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite cp -R build/editor/ThemeEditor.app deploy/
+      - name: Deploy macOS
+        if: runner.os == 'macOS'
+        run: |
+          mkdir -p deploy
+          macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite
+          cp -R build/editor/ThemeEditor.app deploy/
 
-            - name: Prepare Linux artifact
-            if: runner.os == 'Linux'
-            run: |
-                mkdir -p deploy cp build/editor/ThemeEditor deploy/ThemeEditor
+      - name: Prepare Linux artifact
+        if: runner.os == 'Linux'
+        run: |
+          mkdir -p deploy
+          cp build/editor/ThemeEditor deploy/ThemeEditor
 
-            - name: Upload ready build
-            uses: action/upload-artifact@v4
-            with:
-                name: haqml-theme-engine-${{ matrix.os }}
-                path: deploy/
-                if-no-files-found: error
+      - name: Upload ready build
+        uses: actions/upload-artifact@v4
+        with:
+          name: haqml-theme-engine-${{ matrix.os }}
+          path: deploy/
+          if-no-files-found: error
