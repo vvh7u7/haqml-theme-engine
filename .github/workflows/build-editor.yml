@@ -25,6 +25,12 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -y ninja-build build-essential libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev libfontconfig1-dev libdbus-1-dev libxcb-cursor0 libicu-dev
 
+      - name: Setup MSVC environment (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x64
+
       - name: Install Qt 6.8.3
         uses: jurplel/install-qt-action@v4
         with:
