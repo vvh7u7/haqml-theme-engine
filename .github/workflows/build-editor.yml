@@ -51,7 +51,8 @@ jobs:
         shell: pwsh
         run: |
           mkdir -p deploy
-          windeployqt --release --no-compiler-runtime --qmldir editor/qml --dir deploy build/editor/ThemeEditor.exe
+          Copy-Item -Path build/editor/ThemeEditor.exe -Destination deploy/ -Force
+          windeployqt --release --no-compiler-runtime --qmldir editor/qml --dir deploy deploy/ThemeEditor.exe
 
       - name: Deploy macOS
         if: runner.os == 'macOS'
