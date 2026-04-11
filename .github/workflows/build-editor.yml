@@ -27,15 +27,16 @@ jobs:
             libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev \
             libfontconfig1-dev libdbus-1-dev libxcb-cursor0
 
-      - name: Install Qt 6.10.3
+      - name: Install Qt 6.8.3
         uses: jurplel/install-qt-action@v4
         with:
-          version: '6.10.3'
+          version: '6.8.3'
           target: desktop
+          arch: ${{ runner.os == 'Windows' && 'win64_msvc2022_64' || '' }}
           cache: true
 
       - name: Configure CMake
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_MACOSX_BUNDLE=ON
 
       - name: Build project
         run: cmake --build build --config Release --parallel
