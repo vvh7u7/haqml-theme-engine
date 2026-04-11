@@ -9,9 +9,18 @@ set(HEADERS
 )
 
 add_executable(ThemeEditor
+        WIN32
+        MACOSX_BUNDLE
         main.cpp
         ${HEADERS}
         ${SOURCES}
+)
+
+qt_add_resources(ThemeEditor "editor_qrc"
+        PREFIX "/"
+        FILES
+            qml/Main.qml
+            qml/Actions.qml
 )
 
 target_include_directories(HaThemeEngine
@@ -25,11 +34,4 @@ target_link_libraries(ThemeEditor
             HaThemeEngine
             Qt6::Quick
             Qt6::Widgets
-)
-
-qt_add_resources(ThemeEditor "editor_qrc"
-        PREFIX "/"
-        FILES
-            qml/Main.qml
-            qml/Actions.qml
 )

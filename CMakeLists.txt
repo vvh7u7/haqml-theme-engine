@@ -13,6 +13,7 @@ find_package(Qt6 REQUIRED COMPONENTS
         Widgets
 )
 
+
 add_subdirectory(module)
 
 option(BUILD_EDITOR "Build theme editor" ON)

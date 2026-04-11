@@ -19,24 +19,27 @@ jobs:
       - name: Install latest CMake
         uses: lukka/get-cmake@latest
 
-      - name: Install system dependencies (Linux)
+      - name: Install Linux dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y ninja-build build-essential \
             libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev \
-            libfontconfig1-dev libdbus-1-dev libxcb-cursor0
+            libfontconfig1-dev libdbus-1-dev libxcb-cursor0 libicu-dev
 
       - name: Install Qt 6.8.3
         uses: jurplel/install-qt-action@v4
         with:
           version: '6.8.3'
           target: desktop
-          arch: ${{ runner.os == 'Windows' && 'win64_msvc2022_64' || '' }}
+          arch: ${{ runner.os == 'Windows' && 'win64_msvc2022_64' || runner.os == 'macOS' && 'clang_64' || '' }}
           cache: true
 
       - name: Configure CMake
-        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja -DCMAKE_MACOSX_BUNDLE=ON
+        run: |
+          cmake -S . -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -G Ninja
 
       - name: Build project
         run: cmake --build build --config Release --parallel
@@ -52,16 +55,16 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           mkdir -p deploy
-          macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite
+          macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite -verbose=1
           cp -R build/editor/ThemeEditor.app deploy/
 
-      - name: Prepare Linux artifact
+      - name: Prepare Linux
         if: runner.os == 'Linux'
         run: |
           mkdir -p deploy
           cp build/editor/ThemeEditor deploy/ThemeEditor
 
-      - name: Upload ready build
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: haqml-theme-engine-${{ matrix.os }}
