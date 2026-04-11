@@ -41,10 +41,10 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
 
       - name: Build project
-        run: cmake --build build --config Debug --parallel
+        run: cmake --build build --config Release --parallel
 
       - name: Deploy Windows
         if: runner.os == 'Windows'
