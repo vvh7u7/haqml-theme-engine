@@ -56,7 +56,19 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           mkdir -p deploy
-          macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite -verbose=1 cp -R build/editor/ThemeEditor.app deploy/
+          echo "=== Checking if ThemeEditor.app exists ==="
+          ls -la build/editor/ || true
+
+          if [ -d "build/editor/ThemeEditor.app" ]; then
+            echo "Found ThemeEditor.app, running macdeployqt..."
+            macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite -verbose=1
+            cp -R build/editor/ThemeEditor.app deploy/
+            echo "macOS deploy completed"
+          else
+            echo "ERROR: ThemeEditor.app not found!"
+            ls -la build/editor/
+            exit 1
+          fi
 
       - name: Prepare Linux
         if: runner.os == 'Linux'
