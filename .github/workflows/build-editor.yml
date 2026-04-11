@@ -32,7 +32,6 @@ jobs:
         with:
           version: '6.10.3'
           target: desktop
-          modules: 'qtsvg'        # для QML редактора обычно хватает
           cache: true
 
       - name: Configure CMake
@@ -41,7 +40,6 @@ jobs:
       - name: Build project
         run: cmake --build build --config Release --parallel
 
-      # ==================== Deploy ====================
       - name: Deploy Windows
         if: runner.os == 'Windows'
         shell: pwsh
