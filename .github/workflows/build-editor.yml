@@ -23,9 +23,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y ninja-build build-essential \
-            libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev \
-            libfontconfig1-dev libdbus-1-dev libxcb-cursor0 libicu-dev
+          sudo apt-get install -y ninja-build build-essential libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev libfontconfig1-dev libdbus-1-dev libxcb-cursor0 libicu-dev
 
       - name: Install Qt 6.8.3
         uses: jurplel/install-qt-action@v4
@@ -37,26 +35,22 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build \
-            -DCMAKE_BUILD_TYPE=Release \
-            -G Ninja
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja
 
       - name: Build project
-        run: cmake --build build --config Release --parallel
+        run: cmake --build build --config Debug --parallel
 
       - name: Deploy Windows
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          mkdir -p deploy
-          windeployqt --release --no-compiler-runtime --qmldir editor/qml --dir deploy build/editor/ThemeEditor.exe
+          mkdir -p deploy windeployqt --release --no-compiler-runtime --qmldir editor/qml --dir deploy build/editor/ThemeEditor.exe
 
       - name: Deploy macOS
         if: runner.os == 'macOS'
         run: |
           mkdir -p deploy
-          macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite -verbose=1
-          cp -R build/editor/ThemeEditor.app deploy/
+          macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite -verbose=1 cp -R build/editor/ThemeEditor.app deploy/
 
       - name: Prepare Linux
         if: runner.os == 'Linux'
