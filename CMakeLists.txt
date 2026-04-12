@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0.2)
+cmake_minimum_required(VERSION 4.3.1)
 project(HaThemeEngine VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -13,10 +13,9 @@ find_package(Qt6 REQUIRED COMPONENTS
         Widgets
 )
 
-
 add_subdirectory(module)
 
-option(BUILD_EDITOR "Build theme editor" ON)
+option(BUILD_EDITOR "Build theme editor" OFF)
 
 if(BUILD_EDITOR)
     add_subdirectory(editor)
