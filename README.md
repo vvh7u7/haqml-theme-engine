@@ -48,5 +48,5 @@ target_link_libraries(your_app PRIVATE HaThemeEngine)
 
 ### Method 2: Git Submodule
 ```bash
-git submodule add https://github.com/vvh7u7/haqml-theme-engine.git libs/ha-qml-theme-engine
+git submodule add https://github.com/vvh7u7/haqml-theme-engine.git libs/haqml-theme-engine
 ```
