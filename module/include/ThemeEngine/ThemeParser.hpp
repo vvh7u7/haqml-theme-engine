@@ -1,5 +1,4 @@
-#ifndef THEMEENGINE_THEMEPARSER_HPP
-#define THEMEENGINE_THEMEPARSER_HPP
+#pragma once
 
 #include <QObject>
 #include <QColor>
@@ -15,6 +14,7 @@ struct ThemeData {
     QHash<QString, int> radius;
     QHash<QString, QVariantMap> components;
     QHash<QString, QString> meta;
+    QHash<QString, QString> assets;
 
     void clear() {
         colors.clear();
@@ -22,6 +22,7 @@ struct ThemeData {
         radius.clear();
         components.clear();
         meta.clear();
+        assets.clear();
     }
 
     bool isEmpty() const {
@@ -57,6 +58,7 @@ private:
     bool parseRadius(const QJsonObject& radiusObj, ThemeData& outData);
     bool parseComponents(const QJsonObject& componentsObj, ThemeData& outData);
     bool parseMeta(const QJsonObject& metaObj, ThemeData& outData);
+    bool parseAssets(const QJsonObject& assetsObj, ThemeData& outData);
 
     static QColor parseColorString(const QString& colorStr, const ThemeData& currentData);
     static int parseIntValue(const QJsonValue& value, int defaultValue = 0);
@@ -67,5 +69,3 @@ private:
 };
 
 } // namespace ThemeEngine
-
-#endif

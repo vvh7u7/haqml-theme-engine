@@ -1,5 +1,8 @@
 #include "ThemeEngine/ThemeManager.hpp"
+
+#include <qcoreapplication.h>
 #include <QDebug>
+#include <QDir>
 
 namespace ThemeEngine {
 
@@ -26,6 +29,8 @@ ThemeManager* ThemeManager::instance()
 ThemeManager::ThemeManager(QObject* parent) : QObject(parent)
 {
     connect(&m_parser, &ThemeParser::parseError, this, &ThemeManager::themeLoadError);
+    m_baseIconsPath = QCoreApplication::applicationDirPath() + "/assets/themes/icons/";
+    m_externalIconsPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/icons/";
     resetToDefault();
 }
 
@@ -62,6 +67,10 @@ bool ThemeManager::loadThemeFromJson(const QString& jsonString)
 void ThemeManager::resetToDefault()
 {
     applyThemeData(ThemeParser::createDefaultTheme());
+}
+
+void ThemeManager::setBaseIconsPath(const QString &path) {
+    m_baseIconsPath = QDir(path).absolutePath() + "/";
 }
 
 bool ThemeManager::mergeTheme(const QString& path)
@@ -119,6 +128,32 @@ int ThemeManager::radius(const QString& name) const
 QVariantMap ThemeManager::component(const QString& name) const
 {
     return m_currentTheme.components.value(name);
+}
+
+QString ThemeManager::icon(const QString &name) const {
+    QString svgName = name.endsWith(".svg") ? name : name + ".svg";
+
+    if (m_currentTheme.assets.contains("icons")) {
+        QString customDirName = m_currentTheme.assets["icons"];
+        QString customPath = m_externalIconsPath + customDirName + "/" + svgName;
+
+        if (QFile::exists(customPath)) {
+            return QUrl::fromLocalFile(customPath).toString();
+        }
+    }
+    QString externalDefaultPath = m_externalIconsPath + "material/" + svgName;
+    if (QFile::exists(externalDefaultPath)) {
+        return QUrl::fromLocalFile(externalDefaultPath).toString();
+    }
+    QString qrcPath = ":/assets/themes/icons/material/" + svgName;
+    if (QFile::exists(qrcPath)) {
+        QString finalUrl = qrcPath;
+        finalUrl.replace(0, 1, "qrc://");
+        return finalUrl;
+    }
+
+    qWarning() << "[ThemeManager] Icon absolutely not found:" << name;
+    return QString();
 }
 
 QVariantMap ThemeManager::colors() const

@@ -1,4 +1,5 @@
 #include "ThemeEngine/ThemeParser.hpp"
+
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonArray>
@@ -9,24 +10,33 @@ namespace ThemeEngine {
 
 ThemeParser::ThemeParser(QObject* parent) : QObject(parent) {}
 
-bool ThemeParser::parseFromFile(const QString& path, ThemeData& outData)
+    bool ThemeParser::parseFromFile(const QString& path, ThemeData& outData)
 {
-    m_currentFile = path;
-    QFile file(path);
+    QString cleanPath = path;
+
+    if (cleanPath.startsWith("qrc:///")) {
+        cleanPath = cleanPath.mid(6);
+    } else if (cleanPath.startsWith("qrc:/")) {
+        cleanPath = cleanPath.mid(3);
+    }
+
+    m_currentFile = cleanPath;
+    QFile file(cleanPath);
     if (!file.open(QIODevice::ReadOnly)) {
-        emitError(QString("Cannot open file: %1").arg(path));
+        emitError(QString("Cannot open file: %1").arg(cleanPath));
         return false;
     }
     const QByteArray data = file.readAll();
     const QJsonDocument doc = QJsonDocument::fromJson(data);
     if (doc.isNull()) {
-        emitError(QString("Invalid JSON in file: %1").arg(path));
+        emitError(QString("Invalid JSON in file: %1").arg(cleanPath));
         return false;
     }
     if (!doc.isObject()) {
         emitError("JSON root must be an object");
         return false;
     }
+
     const bool result = parseFromJsonObject(doc.object(), outData);
     m_currentFile.clear();
     return result;
@@ -75,6 +85,12 @@ bool ThemeParser::parseFromJsonObject(const QJsonObject& root, ThemeData& outDat
             return false;
         }
     }
+    if (root.contains("assets")) {
+        if (!parseAssets(root["assets"].toObject(), outData)) {
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -140,6 +156,16 @@ bool ThemeParser::parseMeta(const QJsonObject& metaObj, ThemeData& outData)
     for (auto it = metaObj.begin(); it != metaObj.end(); ++it) {
         if (it.value().isString()) {
             outData.meta[it.key()] = it.value().toString();
+        }
+    }
+    return true;
+}
+
+bool ThemeParser::parseAssets(const QJsonObject& assetsObj, ThemeData& outData)
+{
+    for (auto it = assetsObj.begin(); it != assetsObj.end(); ++it) {
+        if (it.value().isString()) {
+            outData.assets[it.key()] = it.value().toString();
         }
     }
     return true;
@@ -256,6 +282,14 @@ QString ThemeParser::exportToJson(const ThemeData& data)
         }
         root["components"] = componentsObj;
     }
+    if (!data.assets.isEmpty()) {
+        QJsonObject assetsObj;
+        for (auto it = data.assets.begin(); it != data.assets.end(); ++it) {
+            assetsObj[it.key()] = it.value();
+        }
+        root["assets"] = assetsObj;
+    }
+
     return QString::fromUtf8(QJsonDocument(root).toJson(QJsonDocument::Indented));
 }
 
@@ -287,8 +321,12 @@ void ThemeParser::mergeThemes(ThemeData& base, const ThemeData& overlay)
     for (auto it = overlay.meta.begin(); it != overlay.meta.end(); ++it) {
         base.meta[it.key()] = it.value();
     }
+    for (auto it = overlay.assets.begin(); it != overlay.assets.end(); ++it) {
+        base.assets[it.key()] = it.value();
+    }
 }
 
+// ЕБАНОЕ ГРЯЗНОЕ ДЕРЬМО
 ThemeData ThemeParser::createDefaultTheme()
 {
     ThemeData data;
@@ -307,6 +345,8 @@ ThemeData ThemeParser::createDefaultTheme()
     data.radius["l"] = 12;
     data.meta["name"] = "DefaultTheme";
     data.meta["version"] = "1.0";
+    data.assets["icons"] = "material";
+
     return data;
 }
 

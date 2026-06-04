@@ -4,6 +4,8 @@
 
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QDebug>
+#include <QImageReader>
 
 #include <ThemeEngine/ThemeManager.hpp>
 #include <ThemeEditor/EditorActions.hpp>
@@ -15,18 +17,26 @@ int main(int argc, char *argv[])
 {
     //QGuiApplication app(argc, argv);
     QApplication app(argc, argv);
+
+    qDebug() << "[Debug] Supported image formats:" << QImageReader::supportedImageFormats();
+
+    //Решение проблемы с регистрацией ресурсов от статических библиотек
+    Q_INIT_RESOURCE(resources);
+
     QQmlApplicationEngine engine;
 
     qmlRegisterType<EditorActions>("EditorActions", 1, 0, "EditorActions");
 
     ThemeEditor::FileSelector* fileSelector = new ThemeEditor::FileSelector();
 
+    auto* manager = ThemeManager::instance();
+    if (!manager->loadTheme(":/assets/themes/Dark.json")) {
+        qWarning() << "[Main] Failed to pre-load embedded Dark.json from resources!";
+    }
+
     qmlRegisterSingletonType<ThemeManager>("ThemeEngine", 1, 0, "Theme",
         [](QQmlEngine*, QJSEngine*) -> QObject* {
-            auto* manager = ThemeManager::instance();
-            manager->loadTheme(":/themes/Dark.json");
-
-            return manager;
+            return ThemeManager::instance();
         }
     );
 

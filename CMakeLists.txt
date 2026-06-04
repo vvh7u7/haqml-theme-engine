@@ -11,7 +11,10 @@ find_package(Qt6 REQUIRED COMPONENTS
         Qml
         Quick
         Widgets
+        Svg
 )
+
+find_package(Qt6Svg REQUIRED)
 
 add_subdirectory(module)
 

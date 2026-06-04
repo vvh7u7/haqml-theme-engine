@@ -56,7 +56,7 @@ ApplicationWindow {
         Rectangle {
             width: 200
             height: 100
-            color: Theme.color("primary")
+            color: "grey"
             radius: Theme.radius.m
 
             Text {

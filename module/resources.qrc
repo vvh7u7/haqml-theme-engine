@@ -1,0 +1,18 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource prefix="/">
+        <file>assets/themes/Dark.json</file>
+
+        <file>assets/themes/icons/material/close.svg</file>
+        <file>assets/themes/icons/material/search.svg</file>
+        <file>assets/themes/icons/material/menu.svg</file>
+        <file>assets/themes/icons/material/cancel.svg</file>
+        <file>assets/themes/icons/material/check.svg</file>
+        <file>assets/themes/icons/material/add_circle.svg</file>
+        <file>assets/themes/icons/material/bolt.svg</file>
+        <file>assets/themes/icons/material/done_all.svg</file>
+        <file>assets/themes/icons/material/download.svg</file>
+        <file>assets/themes/icons/material/key.svg</file>
+        <file>assets/themes/icons/material/more_vert.svg</file>
+    </qresource>
+</RCC>

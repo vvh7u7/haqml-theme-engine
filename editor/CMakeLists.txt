@@ -23,15 +23,16 @@ qt_add_resources(ThemeEditor "editor_qrc"
             qml/Actions.qml
 )
 
-target_include_directories(HaThemeEngine
-        PUBLIC
-            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-            $<INSTALL_INTERFACE:include>
+target_include_directories(ThemeEditor
+        PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
 target_link_libraries(ThemeEditor
         PRIVATE
             HaThemeEngine
+            Qt6::Core
             Qt6::Quick
             Qt6::Widgets
+            Qt6::Svg
 )

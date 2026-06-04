@@ -1,8 +1,8 @@
-#ifndef THEMEENGINE_THEMEMANAGER_HPP
-#define THEMEENGINE_THEMEMANAGER_HPP
+#pragma once
 
 #include <QQmlEngine>
-#include "ThemeParser.hpp"
+#include <QStandardPaths>
+#include <ThemeEngine/ThemeParser.hpp>
 
 namespace ThemeEngine {
 
@@ -27,11 +27,13 @@ public:
     Q_INVOKABLE bool loadTheme(const QString& path);
     Q_INVOKABLE bool loadThemeFromJson(const QString& jsonString);
     Q_INVOKABLE void resetToDefault();
+    void setBaseIconsPath(const QString& path);
 
     Q_INVOKABLE QColor color(const QString& name) const;
     Q_INVOKABLE int spacing(const QString& name) const;
     Q_INVOKABLE int radius(const QString& name) const;
     Q_INVOKABLE QVariantMap component(const QString& name) const;
+    Q_INVOKABLE QString icon(const QString& name) const;
 
     QVariantMap colors() const;
     QVariantMap spacing() const;
@@ -65,8 +67,8 @@ private:
     QList<ThemeData> m_themeStack;
     ThemeParser m_parser;
     static ThemeManager* s_instance;
+    QString m_baseIconsPath;
+    QString m_externalIconsPath;
 };
 
 } // namespace ThemeEngine
-
-#endif

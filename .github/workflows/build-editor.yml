@@ -3,7 +3,12 @@ name: Build Theme Editor
 on:
   push:
     branches: [ "main" ]
-
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - 'README.md'
+      - 'module'
 jobs:
   build:
     name: Theme Editor ${{ matrix.os }}
