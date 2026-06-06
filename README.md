@@ -3,6 +3,8 @@
 [![Qt6](https://img.shields.io/badge/Qt-6.10+-green.svg)](https://www.qt.io)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+КОГДА-НИБУДЬ Я СДЕЛАЮ ДОКУМЕНТАЦИЮ, НО Я ДАЖЕ ЮАЗОВЫЙ ФУНКЦИОНАЛ НЕ СДЕЛАЛ, ПО ЭТОМУ НИЧЕГО ОТ МЕНЯ НЕ ЖДИТЕ В БЛИЖАЙШЕЕ ВРЕМЯ!!!!!!!
+
 A simple theme engine for Qt & QML that allows you to configure colors, spacing, corner rounding, and additional visual parameters - all in a single JSON file.
 
 > [!WARNING]
