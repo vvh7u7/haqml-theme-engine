@@ -29,7 +29,8 @@ ThemeManager* ThemeManager::instance()
 ThemeManager::ThemeManager(QObject* parent) : QObject(parent)
 {
     connect(&m_parser, &ThemeParser::parseError, this, &ThemeManager::themeLoadError);
-    m_baseIconsPath = QCoreApplication::applicationDirPath() + "/assets/themes/icons/";
+    //m_baseIconsPath = QCoreApplication::applicationDirPath() + "/assets/themes/icons/";
+    m_baseIconsPath = ":/assets/themes/icons/";
     m_externalIconsPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/icons/";
     resetToDefault();
 }
@@ -141,11 +142,20 @@ QString ThemeManager::icon(const QString &name) const {
             return QUrl::fromLocalFile(customPath).toString();
         }
     }
+
     QString externalDefaultPath = m_externalIconsPath + "material/" + svgName;
     if (QFile::exists(externalDefaultPath)) {
         return QUrl::fromLocalFile(externalDefaultPath).toString();
     }
-    QString qrcPath = ":/assets/themes/icons/material/" + svgName;
+
+    if (!m_baseIconsPath.startsWith(":/")) {
+        QString localPath = m_baseIconsPath + "material/" + svgName;
+        if (QFile::exists(localPath)) {
+            return QUrl::fromLocalFile(localPath).toString();
+        }
+    }
+
+    QString qrcPath = m_baseIconsPath + "material/" + svgName;
     if (QFile::exists(qrcPath)) {
         QString finalUrl = qrcPath;
         finalUrl.replace(0, 1, "qrc://");

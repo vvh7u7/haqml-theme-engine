@@ -31,6 +31,10 @@ ApplicationWindow {
         }
     }
 
+    Image {
+        source: Theme.icon("cancel")
+    }
+
     Text {
         anchors.fill: parent
         text: "At the moment, the editor is only in the planning stages, and I'll most likely abandon this idea anyway))"
