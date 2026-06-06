@@ -1,0 +1,49 @@
+{
+  "meta": {
+    "name": "Dark",
+    "version": "26.6.6",
+    "description": "Standard light theme...",
+    "authors": [
+      {
+        "name": "Vladyslav Harbar",
+        "email": "vvhfaq@gmail.com"
+      }
+    ]
+  },
+  "assets": {
+    "icons": "material"
+  },
+  "colors": {
+    "primary": "#1976D2",
+    "primaryHover": "#2196F3",
+
+    "background": "#F5F5F5",
+    "surface": "#FFFFFF",
+    "surfaceVariant": "#E0E0E0",
+
+    "textPrimary": "#1C1C1C",
+    "textSecondary": "#666666",
+    "textDisabled": "#9E9E9E",
+
+    "selection": "#E3F2FD",
+    "disabled": "#E0E0E0",
+
+    "border": "#D5D5D5",
+    "error": "#D32F2F",
+    "success": "#388E3C",
+
+    "unreadBadge": "#00C853"
+  },
+  "spacing": {
+    "xs": 4,
+    "s": 8,
+    "m": 16,
+    "l": 24,
+    "xl": 32
+  },
+  "radius": {
+    "s": 4,
+    "m": 8,
+    "l": 12
+  }
+}
