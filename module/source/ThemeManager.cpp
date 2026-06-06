@@ -37,8 +37,25 @@ ThemeManager::ThemeManager(QObject* parent) : QObject(parent)
 
 bool ThemeManager::loadTheme(const QString& path)
 {
+    QString jsonFileName = path.endsWith(".json") ? path : path + ".json";
+
+    if (jsonFileName.contains("/")) {
+        jsonFileName = jsonFileName.section('/', -1);
+    }
+
+    QString relativeJsonPath = "assets/themes/" + jsonFileName;
+    QString resolvedPath = resolveQrcPath(relativeJsonPath);
+
+    QString finalPathToParse = path;
+
+    if (!resolvedPath.isEmpty()) {
+        finalPathToParse = resolvedPath;
+        finalPathToParse.replace(0, 6, ":");
+        qDebug() << "[ThemeManager] Theme resolved from QRC:" << finalPathToParse;
+    }
+
     ThemeData newData;
-    if (!m_parser.parseFromFile(path, newData)) {
+    if (!m_parser.parseFromFile(finalPathToParse, newData)) {
         return false;
     }
     if (!ThemeParser::validateTheme(newData)) {
@@ -124,6 +141,23 @@ void ThemeManager::emitDataChanged()
     emit themeChanged();
 }
 
+QString ThemeManager::resolveQrcPath(const QString &relativePath) const
+{
+    if (!m_appResourcePrefix.isEmpty() && m_appResourcePrefix != ":/") {
+        QString appPath = m_appResourcePrefix + relativePath;
+        if (QFile::exists(appPath)) {
+            return appPath.replace(0, 1, "qrc://");
+        }
+    }
+
+    QString bqPath = QString(":/haqml/") + relativePath;
+    if (QFile::exists(bqPath)) {
+        return bqPath.replace(0, 1, "qrc://");
+    }
+
+    return QString();
+}
+
 QColor ThemeManager::color(const QString& name) const
 {
     return m_currentTheme.colors.value(name, QColor(Qt::red));
@@ -160,24 +194,20 @@ QString ThemeManager::icon(const QString &name) const {
     if (QFile::exists(externalDefaultPath)) {
         return QUrl::fromLocalFile(externalDefaultPath).toString();
     }
+
     if (!m_baseIconsPath.startsWith(":/")) {
         QString localPath = m_baseIconsPath + "material/" + svgName;
         if (QFile::exists(localPath)) {
             return QUrl::fromLocalFile(localPath).toString();
         }
     }
-    if (!m_appResourcePrefix.isEmpty() && m_appResourcePrefix != ":/") {
-        QString appQrcPath = m_appResourcePrefix + "assets/themes/icons/material/" + svgName;
 
-        if (QFile::exists(appQrcPath)) {
-            return appQrcPath.replace(0, 1, "qrc://");
-        }
+    QString relativeIconPath = "assets/themes/icons/material/" + svgName;
+    QString resolvedQrc = resolveQrcPath(relativeIconPath);
+    if (!resolvedQrc.isEmpty()) {
+        return resolvedQrc;
     }
 
-    QString baseQrcPath = QString(":/haqml/assets/themes/icons/material/") + svgName;
-    if (QFile::exists(baseQrcPath)) {
-        return baseQrcPath.replace(0, 1, "qrc://");
-    }
     if (m_baseIconsPath.startsWith(":/")) {
         QString dynamicQrcPath = m_baseIconsPath + "material/" + svgName;
         if (QFile::exists(dynamicQrcPath)) {

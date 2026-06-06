@@ -27,7 +27,7 @@ public:
     Q_INVOKABLE bool loadTheme(const QString& path);
     Q_INVOKABLE bool loadThemeFromJson(const QString& jsonString);
     Q_INVOKABLE void resetToDefault();
-    Q_INVOKABLE void setAppResourcePrefix(const QString &prefix);
+    Q_INVOKABLE void setAppResourcePrefix(const QString& prefix);
     void setBaseIconsPath(const QString& path);
 
     Q_INVOKABLE QColor color(const QString& name) const;
@@ -63,6 +63,8 @@ signals:
 private:
     void applyThemeData(const ThemeData& data);
     void emitDataChanged();
+
+    QString resolveQrcPath(const QString& relativePath) const;
 
     QString m_appResourcePrefix = ":/app/";
 
