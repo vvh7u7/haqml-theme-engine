@@ -1,6 +1,6 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
-    <qresource prefix="/">
+    <qresource prefix="/haqml">
         <file>assets/themes/Dark.json</file>
 
         <file>assets/themes/icons/material/close.svg</file>

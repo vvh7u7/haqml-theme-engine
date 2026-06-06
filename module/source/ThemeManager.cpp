@@ -70,7 +70,20 @@ void ThemeManager::resetToDefault()
     applyThemeData(ThemeParser::createDefaultTheme());
 }
 
-void ThemeManager::setBaseIconsPath(const QString &path) {
+void ThemeManager::setAppResourcePrefix(const QString &prefix)
+{
+    QString cleanPrefix = prefix;
+    if (!cleanPrefix.startsWith(":/")) {
+        cleanPrefix = ":/" + cleanPrefix;
+    }
+    if (!cleanPrefix.endsWith("/")) {
+        cleanPrefix += "/";
+    }
+    m_appResourcePrefix = cleanPrefix;
+}
+
+void ThemeManager::setBaseIconsPath(const QString &path)
+{
     m_baseIconsPath = QDir(path).absolutePath() + "/";
 }
 
@@ -147,19 +160,29 @@ QString ThemeManager::icon(const QString &name) const {
     if (QFile::exists(externalDefaultPath)) {
         return QUrl::fromLocalFile(externalDefaultPath).toString();
     }
-
     if (!m_baseIconsPath.startsWith(":/")) {
         QString localPath = m_baseIconsPath + "material/" + svgName;
         if (QFile::exists(localPath)) {
             return QUrl::fromLocalFile(localPath).toString();
         }
     }
+    if (!m_appResourcePrefix.isEmpty() && m_appResourcePrefix != ":/") {
+        QString appQrcPath = m_appResourcePrefix + "assets/themes/icons/material/" + svgName;
 
-    QString qrcPath = m_baseIconsPath + "material/" + svgName;
-    if (QFile::exists(qrcPath)) {
-        QString finalUrl = qrcPath;
-        finalUrl.replace(0, 1, "qrc://");
-        return finalUrl;
+        if (QFile::exists(appQrcPath)) {
+            return appQrcPath.replace(0, 1, "qrc://");
+        }
+    }
+
+    QString baseQrcPath = QString(":/haqml/assets/themes/icons/material/") + svgName;
+    if (QFile::exists(baseQrcPath)) {
+        return baseQrcPath.replace(0, 1, "qrc://");
+    }
+    if (m_baseIconsPath.startsWith(":/")) {
+        QString dynamicQrcPath = m_baseIconsPath + "material/" + svgName;
+        if (QFile::exists(dynamicQrcPath)) {
+            return dynamicQrcPath.replace(0, 1, "qrc://");
+        }
     }
 
     qWarning() << "[ThemeManager] Icon absolutely not found:" << name;

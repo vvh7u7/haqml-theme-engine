@@ -10,10 +10,13 @@ set(HEADERS
         include/ThemeEngine/IconManager.hpp
 )
 
+qt_add_resources(HA_THEME_RESOURCES haqml_resources.qrc)
+
 add_library(HaThemeEngine STATIC
         ${SOURCES}
         ${HEADERS}
-        resources.qrc
+        ${HA_THEME_RESOURCES}
+        #[[resources.qrc]]
 )
 
 target_include_directories(HaThemeEngine

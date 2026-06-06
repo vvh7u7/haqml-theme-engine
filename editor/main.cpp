@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
     qDebug() << "[Debug] Supported image formats:" << QImageReader::supportedImageFormats();
 
     //Решение проблемы с регистрацией ресурсов от статических библиотек
-    Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(haqml_resources);
 
     QQmlApplicationEngine engine;
 
