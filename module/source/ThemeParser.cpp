@@ -10,10 +10,11 @@ namespace ThemeEngine {
 
 ThemeParser::ThemeParser(QObject* parent) : QObject(parent) {}
 
-    bool ThemeParser::parseFromFile(const QString& path, ThemeData& outData)
+bool ThemeParser::parseFromFile(const QString& path, ThemeData& outData)
 {
     QString cleanPath = path;
 
+    // Strip out standard URL schemes if the path argument comes from QML components like FileDialog
     if (cleanPath.startsWith("qrc:///")) {
         cleanPath = cleanPath.mid(6);
     } else if (cleanPath.startsWith("qrc:/")) {
@@ -173,15 +174,22 @@ bool ThemeParser::parseAssets(const QJsonObject& assetsObj, ThemeData& outData)
 
 QColor ThemeParser::parseColorString(const QString& colorStr, const ThemeData& currentData)
 {
+     // HEX Format parsing support (#FFF, #RRGGBB, #AARRGGBB)
     if (colorStr.startsWith('#')) {
         QColor color(colorStr);
         if (color.isValid()) return color;
     }
+
+    // Standard W3C named colors support (e.g., "red", "transparent")
     QColor namedColor(colorStr);
     if (namedColor.isValid()) return namedColor;
+    
+    // Cross-referencing alias lookup matching previously parsed colors within the active configuration
     if (currentData.colors.contains(colorStr)) {
         return currentData.colors[colorStr];
     }
+
+    // Functional CSS descriptor string parsing support: rgb(255, 255, 255)
     QRegularExpression rgbRegex("rgb\\((\\d+),\\s*(\\d+),\\s*(\\d+)\\)");
     QRegularExpressionMatch match = rgbRegex.match(colorStr);
     if (match.hasMatch()) {
@@ -213,6 +221,7 @@ void ThemeParser::emitError(const QString& error, const QJsonObject& context)
 
 bool ThemeParser::validateTheme(const ThemeData& data)
 {
+    // Ensure critical color configuration requirements are satisfied
     QStringList requiredColors = {"primary", "background", "textPrimary"};
     for (const QString& color : requiredColors) {
         if (!data.colors.contains(color)) {
@@ -220,6 +229,8 @@ bool ThemeParser::validateTheme(const ThemeData& data)
             return false;
         }
     }
+
+    // Ensure critical spacing scale model requirements are satisfied
     QStringList requiredSpacing = {"xs", "s", "m", "l"};
     for (const QString& spacing : requiredSpacing) {
         if (!data.spacing.contains(spacing)) {
@@ -327,6 +338,11 @@ void ThemeParser::mergeThemes(ThemeData& base, const ThemeData& overlay)
 }
 
 // ЕБАНОЕ ГРЯЗНОЕ ДЕРЬМО
+
+/**
+ * @brief Creates a default theme layout structure as a fallback on asset setup failures.
+ * @note Note to developers: contains hardcoded core values matching the base Material Dark palette.
+ */
 ThemeData ThemeParser::createDefaultTheme()
 {
     ThemeData data;
