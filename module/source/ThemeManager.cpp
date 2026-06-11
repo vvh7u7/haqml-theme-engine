@@ -28,10 +28,14 @@ ThemeManager* ThemeManager::instance()
 
 ThemeManager::ThemeManager(QObject* parent) : QObject(parent)
 {
+    // Forward parser errors to the manager's public interface
     connect(&m_parser, &ThemeParser::parseError, this, &ThemeManager::themeLoadError);
+    
     //m_baseIconsPath = QCoreApplication::applicationDirPath() + "/assets/themes/icons/";
     m_baseIconsPath = ":/assets/themes/icons/";
     m_externalIconsPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/icons/";
+    
+    // Initialize with the default theme configuration on startup
     resetToDefault();
 }
 
@@ -58,6 +62,8 @@ bool ThemeManager::loadTheme(const QString& path)
     if (!m_parser.parseFromFile(finalPathToParse, newData)) {
         return false;
     }
+    
+    // Strict schema validation before applying the parsed theme
     if (!ThemeParser::validateTheme(newData)) {
         const QStringList missing = ThemeParser::getMissingRequiredFields(newData);
         emit themeLoadError(QString("Missing required fields: %1").arg(missing.join(", ")));
@@ -158,6 +164,7 @@ QString ThemeManager::resolveQrcPath(const QString &relativePath) const
     return QString();
 }
 
+// Secure fallback to solid red color if the key is missing from configuration
 QColor ThemeManager::color(const QString& name) const
 {
     return m_currentTheme.colors.value(name, QColor(Qt::red));
@@ -181,6 +188,7 @@ QVariantMap ThemeManager::component(const QString& name) const
 QString ThemeManager::icon(const QString &name) const {
     QString svgName = name.endsWith(".svg") ? name : name + ".svg";
 
+    // Search within external (downloaded/user-defined) icon directories
     if (m_currentTheme.assets.contains("icons")) {
         QString customDirName = m_currentTheme.assets["icons"];
         QString customPath = m_externalIconsPath + customDirName + "/" + svgName;
@@ -190,11 +198,13 @@ QString ThemeManager::icon(const QString &name) const {
         }
     }
 
+    // Search inside external default icon assets (Material fallback)
     QString externalDefaultPath = m_externalIconsPath + "material/" + svgName;
     if (QFile::exists(externalDefaultPath)) {
         return QUrl::fromLocalFile(externalDefaultPath).toString();
     }
 
+    // Search via local file system paths (if the path string is not QRC)
     if (!m_baseIconsPath.startsWith(":/")) {
         QString localPath = m_baseIconsPath + "material/" + svgName;
         if (QFile::exists(localPath)) {
@@ -202,12 +212,14 @@ QString ThemeManager::icon(const QString &name) const {
         }
     }
 
+    // Resolve fallback via built-in embedded app resources
     QString relativeIconPath = "assets/themes/icons/material/" + svgName;
     QString resolvedQrc = resolveQrcPath(relativeIconPath);
     if (!resolvedQrc.isEmpty()) {
         return resolvedQrc;
     }
 
+    // Dynamic search using theme QRC resource path prefixes
     if (m_baseIconsPath.startsWith(":/")) {
         QString dynamicQrcPath = m_baseIconsPath + "material/" + svgName;
         if (QFile::exists(dynamicQrcPath)) {
@@ -218,6 +230,8 @@ QString ThemeManager::icon(const QString &name) const {
     qWarning() << "[ThemeManager] Icon absolutely not found:" << name;
     return QString();
 }
+
+// Convert internal QHash structures into QVariantMap containers for QML bridging
 
 QVariantMap ThemeManager::colors() const
 {
