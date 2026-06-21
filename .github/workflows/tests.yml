@@ -1,0 +1,46 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches: [ "main" ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  run-tests:
+    name: Run Tests (Ubuntu)
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install latest CMake
+        uses: lukka/get-cmake@latest
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ninja-build build-essential libgl1-mesa-dev libxkbcommon-x11-dev libglib2.0-dev libfontconfig1-dev libdbus-1-dev libxcb-cursor0 libicu-dev
+
+      - name: Install Qt 6.8.3
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: '6.8.3'
+          target: desktop
+          cache: true
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -G Ninja -DBUILD_EDITOR=OFF
+
+      - name: Build Tests
+        run: cmake --build build --config Debug --parallel
+
+      - name: Execute Tests
+        working-directory: build
+        run: ctest --output-on-failure

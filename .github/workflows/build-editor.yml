@@ -1,14 +1,18 @@
-name: Build Theme Editor
+name: Build and Package Theme Editor
 
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - '**.md'
-      - 'docs/**'
-      - '.gitignore'
-      - 'README.md'
-      - 'module'
+    paths:
+      - 'editor/**'
+      - 'CMakeLists.txt'
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'editor/**'
+
 jobs:
   build:
     name: Theme Editor ${{ matrix.os }}
@@ -46,7 +50,7 @@ jobs:
 
       - name: Configure CMake
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G Ninja -DBUILD_EDITOR=ON
 
       - name: Build project
         run: cmake --build build --config Release --parallel
@@ -63,17 +67,11 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           mkdir -p deploy
-          echo "=== Checking if ThemeEditor.app exists ==="
-          ls -la build/editor/ || true
-
           if [ -d "build/editor/ThemeEditor.app" ]; then
-            echo "Found ThemeEditor.app, running macdeployqt..."
             macdeployqt build/editor/ThemeEditor.app -qmldir=editor/qml -always-overwrite -verbose=1
             cp -R build/editor/ThemeEditor.app deploy/
-            echo "macOS deploy completed"
           else
             echo "ERROR: ThemeEditor.app not found!"
-            ls -la build/editor/
             exit 1
           fi
 
@@ -81,7 +79,20 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           mkdir -p deploy
-          cp build/editor/ThemeEditor deploy/ThemeEditor
+          echo "=== Checking where ThemeEditor is located ==="
+          ls -la build/ || true
+          ls -la build/editor/ || true
+          
+          if [ -f "build/ThemeEditor" ]; then
+            cp build/ThemeEditor deploy/ThemeEditor
+            echo "Found ThemeEditor in build/"
+          elif [ -f "build/editor/ThemeEditor" ]; then
+            cp build/editor/ThemeEditor deploy/ThemeEditor
+            echo "Found ThemeEditor in build/editor/"
+          else
+            echo "ERROR: ThemeEditor binary not found anywhere!"
+            exit 1
+          fi
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

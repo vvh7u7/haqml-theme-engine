@@ -23,3 +23,6 @@ option(BUILD_EDITOR "Build theme editor" OFF)
 if(BUILD_EDITOR)
     add_subdirectory(editor)
 endif()
+
+enable_testing()
+add_subdirectory(tests)
