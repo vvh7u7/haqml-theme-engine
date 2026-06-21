@@ -1,7 +1,8 @@
 {
+  "standard": 1,
   "meta": {
     "name": "Dark",
-    "version": "26.6.6",
+    "version": "26.6.21",
     "description": "Standard dark theme...",
     "authors": [
       {

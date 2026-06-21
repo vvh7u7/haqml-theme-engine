@@ -27,6 +27,7 @@ bool ThemeParser::parseFromFile(const QString& path, ThemeData& outData)
         emitError(QString("Cannot open file: %1").arg(cleanPath));
         return false;
     }
+
     const QByteArray data = file.readAll();
     const QJsonDocument doc = QJsonDocument::fromJson(data);
     if (doc.isNull()) {
@@ -61,6 +62,22 @@ bool ThemeParser::parseFromJsonObject(const QJsonObject& root, ThemeData& outDat
 {
     outData.clear();
 
+    int themeStandard = root.contains("standard") ? root["standard"].toInt() : 0;
+    outData.standardVersion = themeStandard;
+
+    if (themeStandard > ThemeParser::CurrentStandardVersion) {
+        emitError(QString("Conflicting standards! Theme requires Standard v%1, but the library only supports up to v%2. Please update the application.")
+            .arg(themeStandard)
+            .arg(ThemeParser::CurrentStandardVersion));
+        return false;
+    }
+
+    if (themeStandard == 0) {
+        qDebug() << "[ThemeParser] Parsing legacy theme (Standard 0)";
+    } else {
+        qDebug() << "[ThemeParser] Parsing theme with Standard v" << themeStandard;
+    }
+
     if (root.contains("meta")) {
         if (!parseMeta(root["meta"].toObject(), outData)) {
             return false;
@@ -89,6 +106,12 @@ bool ThemeParser::parseFromJsonObject(const QJsonObject& root, ThemeData& outDat
     if (root.contains("assets")) {
         if (!parseAssets(root["assets"].toObject(), outData)) {
             return false;
+        }
+    }
+
+    if (themeStandard == 0) {
+        if (!outData.colors.contains("surfaceVariant") && outData.colors.contains("surface")) {
+            outData.colors["surfaceVariant"] = outData.colors["surface"];
         }
     }
 

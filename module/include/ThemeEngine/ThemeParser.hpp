@@ -13,6 +13,7 @@ namespace ThemeEngine {
  * @brief Container structure holding all deserialized theme configuration properties.
  */
 struct ThemeData {
+    int standardVersion = 0;
     QHash<QString, QColor> colors;           ///< Color palette values
     QHash<QString, int> spacing;             ///< Sizing and spacing dimensions
     QHash<QString, int> radius;              ///< Element corner radiuses
@@ -44,6 +45,8 @@ class ThemeParser : public QObject {
     Q_OBJECT
 
 public:
+    static constexpr int CurrentStandardVersion = 1;
+
     explicit ThemeParser(QObject* parent = nullptr);
 
     /** @brief Parses a theme mapping structure from a physical file or QRC resource path */

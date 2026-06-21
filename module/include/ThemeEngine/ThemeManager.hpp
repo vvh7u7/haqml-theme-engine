@@ -4,19 +4,25 @@
 #include <QStandardPaths>
 #include <ThemeEngine/ThemeParser.hpp>
 
-namespace ThemeEngine {
+#define HAQML_THEME_ENGINE_VERSION_MAJOR 0
+#define HAQML_THEME_ENGINE_VERSION_MINOR 1
+#define HAQML_THEME_ENGINE_VERSION_PATCH 1
 
+namespace ThemeEngine {
 /**
  * @class ThemeManager
  * @brief Main singleton theme manager exported to QML.
  * * Manages the current theme state of the application, exposes properties for bindings
  * in the QML interface, supports a theme stack (push/pop), and configuration merging.
  */
+
 class ThemeManager : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
     QML_SINGLETON
+
+    Q_PROPERTY(int engineStandard READ engineStandard CONSTANT)
 
     /** @brief Metadata about the theme (name, version, author, etc.) */
     Q_PROPERTY(QVariantMap meta READ meta NOTIFY themeChanged)
@@ -29,6 +35,10 @@ class ThemeManager : public QObject
     /** @brief Custom UI property mappings for specific individual components */
     Q_PROPERTY(QVariantMap components READ components NOTIFY themeChanged)
 public:
+    static constexpr int SupportedStandard = 1;
+
+    int engineStandard() const { return ThemeParser::CurrentStandardVersion; }
+
     /** Factory method to integrate the singleton into the QML engine */
     static ThemeManager* create(const QQmlEngine* qmlEngine, const QJSEngine* jsEngine);
     /** Returns the global pointer to the manager instance */
