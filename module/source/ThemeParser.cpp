@@ -102,6 +102,7 @@ bool ThemeParser::parseColors(const QJsonObject& colorsObj, ThemeData& outData)
     for (auto it = colorsObj.begin(); it != colorsObj.end(); ++it) {
         QString key = it.key();
         QJsonValue value = it.value();
+
         if (!value.isString()) {
             emitError(QString("Color '%1' must be a string").arg(key), colorsObj);
             return false;
@@ -117,14 +118,17 @@ bool ThemeParser::parseColors(const QJsonObject& colorsObj, ThemeData& outData)
             }
             outData.colors[key] = color;
         } else {
-            // Link to other color
             unresolvedAliases[key] = colorStr;
         }
     }
 
+    int maxIterations = unresolvedAliases.size();
     bool progress = true;
-    while (!unresolvedAliases.isEmpty() && progress) {
+
+    while (!unresolvedAliases.isEmpty() && progress && maxIterations > 0) {
         progress = false;
+        --maxIterations;
+
         auto it = unresolvedAliases.begin();
         while (it != unresolvedAliases.end()) {
             QString aliasKey = it.key();
@@ -140,7 +144,7 @@ bool ThemeParser::parseColors(const QJsonObject& colorsObj, ThemeData& outData)
         }
     }
 
-    // Обработка ошибки, если пользователь тупой даун
+    // Обработка ошибок
     if (!unresolvedAliases.isEmpty()) {
         for (auto it = unresolvedAliases.begin(); it != unresolvedAliases.end(); ++it) {
             emitError(QString("Broken alias or missing base color '%1' for key '%2'")

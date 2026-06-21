@@ -11,6 +11,7 @@ ThemeManager* ThemeManager::s_instance = nullptr;
 
 ThemeManager* ThemeManager::create(const QQmlEngine* qmlEngine, const QJSEngine* jsEngine)
 {
+    Q_UNUSED(jsEngine)
     if (!s_instance) {
         s_instance = new ThemeManager(const_cast<QQmlEngine*>(qmlEngine));
     }
@@ -20,7 +21,7 @@ ThemeManager* ThemeManager::create(const QQmlEngine* qmlEngine, const QJSEngine*
 ThemeManager* ThemeManager::instance()
 {
     if (!s_instance) {
-        s_instance = new ThemeManager();
+        s_instance = new ThemeManager(QCoreApplication::instance());
     }
     return s_instance;
 }
@@ -52,9 +53,13 @@ bool ThemeManager::loadTheme(const QString& path)
     QString finalPathToParse = path;
 
     if (!resolvedPath.isEmpty()) {
-        finalPathToParse = resolvedPath;
-        finalPathToParse.replace(0, 6, ":");
-        qDebug() << "[ThemeManager] Theme resolved from QRC:" << finalPathToParse;
+        QUrl url(resolvedPath);
+        if (url.scheme() == "qrc") {
+            finalPathToParse = ":" + url.path();
+        } else {
+            finalPathToParse = url.toLocalFile();
+        }
+        qDebug() << "[ThemeManager] Theme resolved to:" << finalPathToParse;
     }
 
     ThemeData newData;
