@@ -18,15 +18,16 @@ int main(int argc, char *argv[])
     //QGuiApplication app(argc, argv);
     QApplication app(argc, argv);
 
+    qDebug() << "[ThemeEditor] Starting. Core Theme Standard Version:" << ThemeEngine::ThemeManager::SupportedStandard;
     qDebug() << "[Debug] Supported image formats:" << QImageReader::supportedImageFormats();
 
     //Решение проблемы с регистрацией ресурсов от статических библиотек
     Q_INIT_RESOURCE(haqml_resources);
-
     QQmlApplicationEngine engine;
 
-    qmlRegisterType<EditorActions>("EditorActions", 1, 0, "EditorActions");
+    ThemeManager::instance()->setMaxSupportedStandard(1);
 
+    qmlRegisterType<EditorActions>("EditorActions", 1, 0, "EditorActions");
     ThemeEditor::FileSelector* fileSelector = new ThemeEditor::FileSelector();
 
     auto* manager = ThemeManager::instance();

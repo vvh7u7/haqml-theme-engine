@@ -39,6 +39,10 @@ public:
 
     int engineStandard() const { return ThemeParser::CurrentStandardVersion; }
 
+    /** @brief Forces a limit on the maximum standard version for the application. */
+    void setMaxSupportedStandard(int standard);
+    int maxSupportedStandard() const;
+
     /** Factory method to integrate the singleton into the QML engine */
     static ThemeManager* create(const QQmlEngine* qmlEngine, const QJSEngine* jsEngine);
     /** Returns the global pointer to the manager instance */
@@ -97,6 +101,8 @@ signals:
     void radiusChanged(const QString& name);     ///< Triggered when a specific radius is updated
 
 private:
+    int m_maxSupportedStandard = ThemeParser::CurrentStandardVersion;
+
     void applyThemeData(const ThemeData& data);
     void emitDataChanged();
 

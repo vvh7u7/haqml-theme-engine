@@ -9,6 +9,17 @@ namespace ThemeEngine {
 
 ThemeManager* ThemeManager::s_instance = nullptr;
 
+void ThemeManager::setMaxSupportedStandard(int standard)
+{
+    m_maxSupportedStandard = standard;
+    qDebug() << "[ThemeManager] Application restricted theme standard to max v" << standard;
+}
+
+int ThemeManager::maxSupportedStandard() const
+{
+    return m_maxSupportedStandard;
+}
+
 ThemeManager* ThemeManager::create(const QQmlEngine* qmlEngine, const QJSEngine* jsEngine)
 {
     Q_UNUSED(jsEngine)
@@ -64,6 +75,7 @@ bool ThemeManager::loadTheme(const QString& path)
 
     ThemeData newData;
     if (!m_parser.parseFromFile(finalPathToParse, newData)) {
+        resetToDefault();
         return false;
     }
     

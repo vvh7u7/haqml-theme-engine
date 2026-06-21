@@ -54,7 +54,7 @@ public:
     /** @brief Parses a theme mapping structure out of a raw, unformatted JSON string */
     bool parseFromJson(const QString& jsonString, ThemeData& outData);
     /** @brief Parses a theme mapping directly from an active QJsonObject tree node */
-    bool parseFromJsonObject(const QJsonObject& root, ThemeData& outData);
+    bool parseFromJsonObject(const QJsonObject&root, ThemeData &outData);
 
     /** @brief Validates if the given theme object contains all critical required layout keys */
     static bool validateTheme(const ThemeData& data);

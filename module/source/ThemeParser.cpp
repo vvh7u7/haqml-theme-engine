@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <QRegularExpression>
 
+#include "ThemeEngine/ThemeManager.hpp"
+
 namespace ThemeEngine {
 
 ThemeParser::ThemeParser(QObject* parent) : QObject(parent) {}
@@ -64,6 +66,16 @@ bool ThemeParser::parseFromJsonObject(const QJsonObject& root, ThemeData& outDat
 
     int themeStandard = root.contains("standard") ? root["standard"].toInt() : 0;
     outData.standardVersion = themeStandard;
+
+    int appLimit = ThemeManager::instance()->maxSupportedStandard();
+
+    if (themeStandard > appLimit) {
+        emitError(QString("Conflicting standards! Theme requires Standard v%1, "
+                          "but this application is restricted to support only up to v%2.")
+                  .arg(themeStandard)
+                  .arg(appLimit));
+        return false;
+    }
 
     if (themeStandard > ThemeParser::CurrentStandardVersion) {
         emitError(QString("Conflicting standards! Theme requires Standard v%1, but the library only supports up to v%2. Please update the application.")
@@ -323,6 +335,8 @@ QStringList ThemeParser::getMissingRequiredFields(const ThemeData& data)
 QString ThemeParser::exportToJson(const ThemeData& data)
 {
     QJsonObject root;
+    root["standard"] = data.standardVersion > 0 ? data.standardVersion : ThemeParser::CurrentStandardVersion;
+
     if (!data.meta.isEmpty()) {
         QJsonObject metaObj;
         for (auto it = data.meta.begin(); it != data.meta.end(); ++it) {
@@ -411,6 +425,7 @@ void ThemeParser::mergeThemes(ThemeData& base, const ThemeData& overlay)
 ThemeData ThemeParser::createDefaultTheme()
 {
     ThemeData data;
+    data.standardVersion = ThemeParser::CurrentStandardVersion;
     data.colors["primary"] = QColor("#2196F3");
     data.colors["background"] = QColor("#121212");
     data.colors["surface"] = QColor("#1E1E1E");

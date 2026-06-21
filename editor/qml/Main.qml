@@ -53,7 +53,7 @@ ApplicationWindow {
         }
 
         Text {
-            text: "Current theme: " + (Theme.meta ? Theme.meta.name : "Unknown")
+            text: "Current theme: " + (Theme.meta ? Theme.meta.name : "Unknown") + "    Поддерживаемый стандарт JSON: v" + Theme.engineStandard
             color: Theme.color("textSecondary")
         }
 
