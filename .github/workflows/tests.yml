@@ -43,4 +43,6 @@ jobs:
 
       - name: Execute Tests
         working-directory: build
-        run: ctest --output-on-failure
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: xvfb-run ctest --output-on-failure
