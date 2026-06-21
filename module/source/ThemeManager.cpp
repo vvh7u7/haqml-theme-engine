@@ -142,6 +142,7 @@ bool ThemeManager::popTheme()
 
 void ThemeManager::applyThemeData(const ThemeData& data)
 {
+    m_iconCache.clear();
     m_currentTheme = data;
     emitDataChanged();
 }
@@ -190,6 +191,10 @@ QVariantMap ThemeManager::component(const QString& name) const
 }
 
 QString ThemeManager::icon(const QString &name) const {
+    if (m_iconCache.contains(name)) {
+        return m_iconCache.value(name);
+    }
+
     QString svgName = name.endsWith(".svg") ? name : name + ".svg";
 
     // Search within external (downloaded/user-defined) icon directories
@@ -198,21 +203,27 @@ QString ThemeManager::icon(const QString &name) const {
         QString customPath = m_externalIconsPath + customDirName + "/" + svgName;
 
         if (QFile::exists(customPath)) {
-            return QUrl::fromLocalFile(customPath).toString();
+            QString res = QUrl::fromLocalFile(customPath).toString();
+            m_iconCache[name] = res;
+            return res;
         }
     }
 
     // Search inside external default icon assets (Material fallback)
     QString externalDefaultPath = m_externalIconsPath + "material/" + svgName;
     if (QFile::exists(externalDefaultPath)) {
-        return QUrl::fromLocalFile(externalDefaultPath).toString();
+        QString res = QUrl::fromLocalFile(externalDefaultPath).toString();
+        m_iconCache[name] = res; // Сохраняем в кэш
+        return res;
     }
 
     // Search via local file system paths (if the path string is not QRC)
     if (!m_baseIconsPath.startsWith(":/")) {
         QString localPath = m_baseIconsPath + "material/" + svgName;
         if (QFile::exists(localPath)) {
-            return QUrl::fromLocalFile(localPath).toString();
+            QString res = QUrl::fromLocalFile(localPath).toString();
+            m_iconCache[name] = res; // Сохраняем в кэш
+            return res;
         }
     }
 
@@ -220,6 +231,7 @@ QString ThemeManager::icon(const QString &name) const {
     QString relativeIconPath = "assets/themes/icons/material/" + svgName;
     QString resolvedQrc = resolveQrcPath(relativeIconPath);
     if (!resolvedQrc.isEmpty()) {
+        m_iconCache[name] = resolvedQrc; // Сохраняем в кэш
         return resolvedQrc;
     }
 
@@ -227,11 +239,15 @@ QString ThemeManager::icon(const QString &name) const {
     if (m_baseIconsPath.startsWith(":/")) {
         QString dynamicQrcPath = m_baseIconsPath + "material/" + svgName;
         if (QFile::exists(dynamicQrcPath)) {
-            return dynamicQrcPath.replace(0, 1, "qrc://");
+            QString res = dynamicQrcPath.replace(0, 1, "qrc://");
+            m_iconCache[name] = res; // Сохраняем в кэш
+            return res;
         }
     }
 
     qWarning() << "[ThemeManager] Icon absolutely not found:" << name;
+
+    m_iconCache[name] = QString();
     return QString();
 }
 

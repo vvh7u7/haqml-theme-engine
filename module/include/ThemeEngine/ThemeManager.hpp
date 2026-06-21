@@ -100,6 +100,8 @@ private:
     static ThemeManager* s_instance;
     QString m_baseIconsPath;
     QString m_externalIconsPath;
+
+    mutable QHash<QString, QString> m_iconCache;
 };
 
 } // namespace ThemeEngine
