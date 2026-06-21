@@ -3,6 +3,7 @@
 #include <qcoreapplication.h>
 #include <QDebug>
 #include <QDir>
+#include <qqml.h>
 
 namespace ThemeEngine {
 
@@ -10,10 +11,8 @@ ThemeManager* ThemeManager::s_instance = nullptr;
 
 ThemeManager* ThemeManager::create(const QQmlEngine* qmlEngine, const QJSEngine* jsEngine)
 {
-    Q_UNUSED(qmlEngine)
-    Q_UNUSED(jsEngine)
     if (!s_instance) {
-        s_instance = new ThemeManager();
+        s_instance = new ThemeManager(const_cast<QQmlEngine*>(qmlEngine));
     }
     return s_instance;
 }
@@ -133,6 +132,11 @@ bool ThemeManager::popTheme()
     }
     const ThemeData previous = m_themeStack.takeLast();
     applyThemeData(previous);
+
+    for (const QString& key : m_currentTheme.colors.keys()) { emit colorChanged(key); }
+    for (const QString& key : m_currentTheme.spacing.keys()) { emit spacingChanged(key); }
+    for (const QString& key : m_currentTheme.radius.keys()) { emit radiusChanged(key); }
+
     return true;
 }
 

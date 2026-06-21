@@ -97,6 +97,8 @@ bool ThemeParser::parseFromJsonObject(const QJsonObject& root, ThemeData& outDat
 
 bool ThemeParser::parseColors(const QJsonObject& colorsObj, ThemeData& outData)
 {
+    QHash<QString, QString> unresolvedAliases;
+
     for (auto it = colorsObj.begin(); it != colorsObj.end(); ++it) {
         QString key = it.key();
         QJsonValue value = it.value();
@@ -104,13 +106,49 @@ bool ThemeParser::parseColors(const QJsonObject& colorsObj, ThemeData& outData)
             emitError(QString("Color '%1' must be a string").arg(key), colorsObj);
             return false;
         }
-        QColor color = parseColorString(value.toString(), outData);
-        if (!color.isValid()) {
-            emitError(QString("Invalid color value for '%1'").arg(key), colorsObj);
-            return false;
+
+        QString colorStr = value.toString();
+
+        if (colorStr.startsWith('#') || colorStr.startsWith("rgb") || QColor::isValidColorName(colorStr)) {
+            QColor color = parseColorString(colorStr, outData);
+            if (!color.isValid()) {
+                emitError(QString("Invalid color value for '%1'").arg(key), colorsObj);
+                return false;
+            }
+            outData.colors[key] = color;
+        } else {
+            // Link to other color
+            unresolvedAliases[key] = colorStr;
         }
-        outData.colors[key] = color;
     }
+
+    bool progress = true;
+    while (!unresolvedAliases.isEmpty() && progress) {
+        progress = false;
+        auto it = unresolvedAliases.begin();
+        while (it != unresolvedAliases.end()) {
+            QString aliasKey = it.key();
+            QString targetKey = it.value();
+
+            if (outData.colors.contains(targetKey)) {
+                outData.colors[aliasKey] = outData.colors[targetKey];
+                it = unresolvedAliases.erase(it);
+                progress = true;
+            } else {
+                ++it;
+            }
+        }
+    }
+
+    // Обработка ошибки, если пользователь тупой даун
+    if (!unresolvedAliases.isEmpty()) {
+        for (auto it = unresolvedAliases.begin(); it != unresolvedAliases.end(); ++it) {
+            emitError(QString("Broken alias or missing base color '%1' for key '%2'")
+                      .arg(it.value(), it.key()), colorsObj);
+        }
+        return false;
+    }
+
     return true;
 }
 

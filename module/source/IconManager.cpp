@@ -24,7 +24,7 @@ QString IconManager::getIcon(const QString &iconName) const {
 
     // If not found in custom, search the default directory
     QFile defaultFile(m_defaultIconsPath + svgName);
-    if (!defaultFile.exists()) {
+    if (defaultFile.exists()) {
         return QUrl::fromLocalFile(defaultFile.fileName()).toString();
     }
 
@@ -32,11 +32,11 @@ QString IconManager::getIcon(const QString &iconName) const {
 }
 
 void ThemeEngine::IconManager::setCustomIconsPath(const QString &path) {
-    m_defaultIconsPath = QDir(path).absolutePath() + "/";
+    m_customIconsPath = QDir(path).absolutePath() + "/";
 }
 
 void ThemeEngine::IconManager::setDefaultIconsPath(const QString &path) {
-    m_customIconsPath = QDir(path).absolutePath() + "/";
+    m_defaultIconsPath = QDir(path).absolutePath() + "/";
 }
 
 } // namespace ThemeEngine
